@@ -4,10 +4,15 @@ version := "0.1"
 
 scalaVersion := "2.12.4"
 
+val doobieVersion = "0.5.0"
 libraryDependencies ++= Seq(
+  "com.h2database" % "h2" % "1.4.196",
+  "org.tpolecat" %% "doobie-core" % doobieVersion,
+  "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.typelevel" %% "cats-core" % "1.0.1",
   "org.scalactic" %% "scalactic" % "3.0.4",
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+  "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test"
 )
 
 scalacOptions ++= Seq(
@@ -21,7 +26,6 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",     // Allow definition of implicit functions called views
   "-unchecked",                        // Enable additional warnings where generated code depends on assumptions.
   "-Xcheckinit",                       // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings",                  // Fail the compilation if there are any warnings.
   "-Xfuture",                          // Turn on future language features.
   "-Xlint:adapted-args",               // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative",  // By-name parameter of right associative operator.
