@@ -8,7 +8,8 @@ class FromStringTokenizerTest extends WordSpec with Matchers with TableDrivenPro
   val textAndSentences = Table(
     ("name", "sentence as string", "parsed sentence"),
     ("simple sentence", simpleSentence, expectedSimpleSentence),
-    ("two sentences in one string", twoSentencesInOneString, expectedTwoSentences)
+    ("two sentences in one string", twoSentencesInOneString, expectedTwoSentences),
+    ("same two sentences with multiple lines", sentencesWithMultipleLines, expectedTwoSentences)
   )
 
   "from string tokenizer" should {
@@ -29,4 +30,10 @@ class FromStringTokenizerTest extends WordSpec with Matchers with TableDrivenPro
     Sentence(Word("this"), Word("is"), Word("the"), Word("first"), Word("sentence")),
     Sentence(Word("this"), Word("is"), Word("the"), Word("second"), Word("sentence"))
   )
+
+  def sentencesWithMultipleLines: String =
+    """
+      |This is the first sentence.
+      |This is the second sentence.
+    """.stripMargin
 }

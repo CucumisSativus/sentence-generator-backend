@@ -5,7 +5,7 @@ import net.cucumbersome.sentenceGenerator.domain.{Sentence, Word}
 object FromStringTokenizer {
   def readFromString(input: String): List[Sentence] = {
     val sentences = input.split('.')
-    sentences.map(readSentence).toList
+    sentences.map(readSentence).filter(_.words.nonEmpty).toList
   }
 
   def readSentence(sentence: String): Sentence = {
