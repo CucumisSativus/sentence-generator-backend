@@ -5,6 +5,8 @@ version := "0.1"
 scalaVersion := "2.12.4"
 
 val doobieVersion = "0.5.0"
+val http4sVersion = "0.18.2"
+
 libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.196",
   "org.tpolecat" %% "doobie-core" % doobieVersion,
@@ -12,8 +14,18 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.0.1",
   "org.scalactic" %% "scalactic" % "3.0.4",
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
-  "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test"
+  "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test",
+  "org.http4s" %% "http4s-dsl" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+  "org.http4s" %% "http4s-circe" % http4sVersion,
+  "io.circe" %% "circe-generic" % "0.9.2",
+  "io.circe" %% "circe-literal" % "0.9.2",
+
+
 )
+
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
