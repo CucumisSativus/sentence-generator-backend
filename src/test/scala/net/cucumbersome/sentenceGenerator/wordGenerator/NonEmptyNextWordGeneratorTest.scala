@@ -22,7 +22,7 @@ class NonEmptyNextWordGeneratorTest extends WordSpec with Matchers {
           WordWithSuccessors(Word("word"), Seq(
             Successor(Word("succ1"), 5), Successor(Word("succ2"), 4), Successor(Word("succ3"), 3))
           ), Vector(
-            WordWithSuccessors(Word("word"), Seq(
+            WordWithSuccessors(Word("word2"), Seq(
               Successor(Word("succ4"), 5), Successor(Word("succ5"), 5), Successor(Word("succ6"), 5))
             )
           )
@@ -30,7 +30,7 @@ class NonEmptyNextWordGeneratorTest extends WordSpec with Matchers {
 
         val generator = new NonEmptyNextWordGenerator(words)
 
-        generator.nextWord(Word("word")) should contain oneOf(Word("succ1"), Word("succ2"))
+        generator.nextWord(Word("word"), 2) should contain oneOf(Word("succ1"), Word("succ2"))
       }
 
       "returns none in case word has no successors" in {

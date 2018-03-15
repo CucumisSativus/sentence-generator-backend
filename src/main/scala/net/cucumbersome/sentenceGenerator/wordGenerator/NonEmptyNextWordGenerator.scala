@@ -19,7 +19,7 @@ class NonEmptyNextWordGenerator(words: NonEmptyVector[WordWithSuccessors]) exten
   def nextWord(previousWord: Word, selectFromTop: Int = 5): Option[Word] = {
     words.find(_.word == previousWord)
       .map(_.successors)
-      .map(_.sortBy(_.count))
+      .map(_.sortWith{ case(left, right) => left.count > right.count})
       .map(_.take(selectFromTop))
       .map(scala.util.Random.shuffle(_))
       .flatMap(_.headOption)
