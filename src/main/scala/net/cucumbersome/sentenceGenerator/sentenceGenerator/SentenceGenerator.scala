@@ -23,5 +23,9 @@ class SentenceGenerator(generator: NextWordGenerator) {
         .getOrElse(Seq.empty)
     Sentence(words: _*)
   }
+
+  def generateSentences(number: Int, maxSentenceLength: Int): Seq[Sentence] = {
+    Seq.fill(number)(generateSentence(maxSentenceLength))
+  }
 }
 
