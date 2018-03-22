@@ -5,7 +5,10 @@ import net.cucumbersome.sentenceGenerator.wordGenerator.NextWordGenerator
 
 import scala.annotation.tailrec
 
-class SentenceGenerator(generator: NextWordGenerator) {
+trait SentenceGenerator{
+  def generateSentences(number: Int, maxSentenceLength: Int): Seq[Sentence]
+}
+class SimpleSentenceGenerator(generator: NextWordGenerator) extends SentenceGenerator {
 
   def generateSentence(length: Int): Sentence = {
 
@@ -22,6 +25,10 @@ class SentenceGenerator(generator: NextWordGenerator) {
         .map(word => iterate(Seq(word), 0))
         .getOrElse(Seq.empty)
     Sentence(words: _*)
+  }
+
+  def generateSentences(number: Int, maxSentenceLength: Int): Seq[Sentence] = {
+    Seq.fill(number)(generateSentence(maxSentenceLength))
   }
 }
 
