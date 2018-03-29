@@ -1,6 +1,7 @@
 package net.cucumbersome.sentenceGenerator.domain
 
 case class Word(value: String)
+case class Syllable(value: String)
 
 case class Sentence(words: Word*) {
   def lastWord: Word = words.last
