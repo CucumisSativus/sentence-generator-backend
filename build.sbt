@@ -8,6 +8,7 @@ val doobieVersion = "0.5.0"
 val http4sVersion = "0.18.2"
 val circeVersion = "0.9.2"
 val LogbackVersion = "1.2.3"
+resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.196",
@@ -24,7 +25,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-literal" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "ch.qos.logback" % "logback-classic" % LogbackVersion
+  "ch.qos.logback" % "logback-classic" % LogbackVersion,
+  "com.github.CucumisSativus" % "JHyphenator" % "master-SNAPSHOT"
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
