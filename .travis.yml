@@ -5,3 +5,5 @@ jdk:
   - oraclejdk9
 script:
  - sbt test
+notifications:
+  email: false
