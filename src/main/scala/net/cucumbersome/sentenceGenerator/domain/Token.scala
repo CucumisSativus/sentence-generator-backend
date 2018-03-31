@@ -3,6 +3,10 @@ package net.cucumbersome.sentenceGenerator.domain
 case class Word(value: String)
 case class Syllable(value: String)
 
+case class WordWithSyllables(
+                              word: Word,
+                              syllables: List[Syllable]
+                            )
 case class Sentence(words: Word*) {
   def lastWord: Word = words.last
 }
@@ -17,3 +21,8 @@ case class Successor(successor: Word, count: Int)
 
 case class WordWithSuccessors(word: Word, successors: Seq[Successor])
 
+case class Haiku(
+                  firstLine: Seq[Word],
+                  middleLine: Seq[Word],
+                  lastLine: Seq[Word]
+                )
