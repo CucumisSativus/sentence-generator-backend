@@ -3,11 +3,11 @@ package net.cucumbersome.sentenceGenerator.haikuGenerator
 import cats.data.NonEmptyList
 import cats.data.Validated.Invalid
 import net.cucumbersome.sentenceGenerator.domain.{Sentence, Word}
-import net.cucumbersome.sentenceGenerator.haikuGenerator.HaikuBuilder.ValidationError
+import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder.ValidationError
 import net.cucumbersome.sentenceGenerator.tokenizer.WordHyphenator
 import org.scalatest.{Matchers, WordSpec}
 
-class HaikuBuilderTest extends WordSpec with Matchers {
+class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
   "Haiku builder" when {
     "creating new words with syllables" should {
       "return valid if we have words with syllables from 1 to 7" in {
@@ -21,7 +21,7 @@ class HaikuBuilderTest extends WordSpec with Matchers {
           Word("wyrewolwerowany")
         ))
 
-        val obtained = HaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception("not valid"))
+        val obtained = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception("not valid"))
 
         assert(obtained.wordsBySyllablesCount(1).forall(w => WordHyphenator.hyphenateForPl(w).length == 1))
         assert(obtained.wordsBySyllablesCount(2).forall(w => WordHyphenator.hyphenateForPl(w).length == 2))
@@ -34,7 +34,7 @@ class HaikuBuilderTest extends WordSpec with Matchers {
 
       "return invalid otherwise" in {
         val sentences = Seq(Sentence())
-        val obtained = HaikuBuilder.buildSyllablesDictionary(sentences)
+        val obtained = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences)
         val expected = Invalid(NonEmptyList(
           head = ValidationError(s"Zero words for 1 syllables"),
           tail = (2 to 7).map(syllablesNum =>
@@ -57,9 +57,9 @@ class HaikuBuilderTest extends WordSpec with Matchers {
           Word("wyrewolwerowany")
         ))
 
-        val dict = HaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception(""))
+        val dict = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception(""))
 
-        val haikuBuilder = new HaikuBuilder(dict)
+        val haikuBuilder = new SyllableBasedHaikuBuilder(dict)
 
         val obtained = haikuBuilder.buildHaiku
 

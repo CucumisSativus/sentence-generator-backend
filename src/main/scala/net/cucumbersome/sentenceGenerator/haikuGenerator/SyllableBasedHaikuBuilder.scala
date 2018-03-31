@@ -5,12 +5,15 @@ import cats.data.{NonEmptyList, NonEmptyVector, ValidatedNel}
 import cats.kernel.Semigroup
 import cats.{Apply, SemigroupK}
 import net.cucumbersome.sentenceGenerator.domain.{Haiku, Sentence, Word, WordWithSyllables}
-import net.cucumbersome.sentenceGenerator.haikuGenerator.HaikuBuilder.HaikuSyllablesDictionary
+import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder.HaikuSyllablesDictionary
 import net.cucumbersome.sentenceGenerator.tokenizer.WordHyphenator
 
 import scala.util.Random
 
-class HaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) {
+trait HaikuBuilder {
+  def buildHaiku: Haiku
+}
+class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) extends HaikuBuilder {
 
   private def disc = syllablesDictionary.wordsBySyllablesCount
 
@@ -40,7 +43,7 @@ class HaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) {
   }
 }
 
-object HaikuBuilder {
+object SyllableBasedHaikuBuilder {
 
   case class ValidationError(err: String)
 

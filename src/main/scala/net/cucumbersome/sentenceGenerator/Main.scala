@@ -1,8 +1,10 @@
 package net.cucumbersome.sentenceGenerator
 
 import cats.data.NonEmptyVector
+import cats.data.Validated.{Invalid, Valid}
 import cats.effect.IO
 import fs2.StreamApp
+import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder
 import net.cucumbersome.sentenceGenerator.ports.web.SimpleSentenceGeneratorWebService
 import net.cucumbersome.sentenceGenerator.sentenceGenerator.SimpleSentenceGenerator
 import net.cucumbersome.sentenceGenerator.tokenizer.FromStringTokenizer
@@ -16,17 +18,26 @@ import scala.io.Source
 
 object Main extends StreamApp[IO] {
   override def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] = {
-    val file = Source.fromFile(args.head)
+    val filePath = args.headOption.getOrElse(throw new Exception("No dictionary file path provided"))
+    val file = Source.fromFile(filePath)
       .getLines().toList
 
+    val sentences = FromStringTokenizer.readFromString(file.mkString("."))
 
-    val sentences = FromStringTokenizer.readFromString(file.mkString("\n"))
+    val haikuDictionary = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences) match {
+      case Valid(d) => d
+      case Invalid(errors) => throw new Exception(errors.toList.mkString(" "))
+    }
+
+
+    val haikuBuilder = new SyllableBasedHaikuBuilder(haikuDictionary)
+
     val wordCounts = SentenceWordCounter.countWords(sentences)
     val vector = NonEmptyVector(wordCounts.head, wordCounts.toVector)
 
     val generator = new SimpleSentenceGenerator(new NonEmptyNextWordGenerator(vector))
 
-    val httpService = CORS(new SimpleSentenceGeneratorWebService(generator).service)
+    val httpService = CORS(new SimpleSentenceGeneratorWebService(generator, haikuBuilder).service)
 
     BlazeBuilder[IO]
       .bindHttp(8080, "0.0.0.0")
