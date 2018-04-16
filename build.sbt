@@ -26,11 +26,14 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-literal" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
   "ch.qos.logback" % "logback-classic" % LogbackVersion,
-  "com.github.CucumisSativus" % "JHyphenator" % "master-SNAPSHOT"
+  "com.github.CucumisSativus" % "JHyphenator" % "master-SNAPSHOT",
+  "com.github.pureconfig" %% "pureconfig" % "0.9.1"
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
+
+enablePlugins(JavaAppPackaging)
 
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.

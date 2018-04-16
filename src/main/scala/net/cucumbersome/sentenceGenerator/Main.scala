@@ -3,6 +3,7 @@ package net.cucumbersome.sentenceGenerator
 import cats.data.NonEmptyVector
 import cats.data.Validated.{Invalid, Valid}
 import cats.effect.IO
+import com.typesafe.config.ConfigFactory
 import fs2.StreamApp
 import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder
 import net.cucumbersome.sentenceGenerator.ports.web.SimpleSentenceGeneratorWebService
@@ -12,14 +13,15 @@ import net.cucumbersome.sentenceGenerator.wordCounter.SentenceWordCounter
 import net.cucumbersome.sentenceGenerator.wordGenerator.NonEmptyNextWordGenerator
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.middleware._
-
+import pureconfig._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
 object Main extends StreamApp[IO] {
+  case class AppConfig(filePath: String)
   override def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] = {
-    val filePath = args.headOption.getOrElse(throw new Exception("No dictionary file path provided"))
-    val file = Source.fromFile(filePath)
+    val config = pureconfig.loadConfigOrThrow[AppConfig]
+    val file = Source.fromFile(config.filePath, "UTF-8")
       .getLines().toList
 
     val sentences = FromStringTokenizer.readFromString(file.mkString("."))
