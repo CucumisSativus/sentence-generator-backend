@@ -10,26 +10,20 @@ import org.scalatest.{Matchers, WordSpec}
 class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
   "Haiku builder" when {
     "creating new words with syllables" should {
-      "return valid if we have words with syllables from 1 to 7" in {
+      s"return valid if we have words with syllables from 1 to ${HaikuBuilder.haikuMaxSyllablesCount}" in {
         val sentences = Seq(Sentence(
           Word("pies"),
           Word("pralka"),
           Word("autobus"),
           Word("magnetofon"),
-          Word("pomarańczowe"),
-          Word("zarchiwizowany"),
-          Word("wyrewolwerowany")
+          Word("pomarańczowe")
         ))
 
         val obtained = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception("not valid"))
 
-        assert(obtained.wordsBySyllablesCount(1).forall(w => WordHyphenator.hyphenateForPl(w).length == 1))
-        assert(obtained.wordsBySyllablesCount(2).forall(w => WordHyphenator.hyphenateForPl(w).length == 2))
-        assert(obtained.wordsBySyllablesCount(3).forall(w => WordHyphenator.hyphenateForPl(w).length == 3))
-        assert(obtained.wordsBySyllablesCount(4).forall(w => WordHyphenator.hyphenateForPl(w).length == 4))
-        assert(obtained.wordsBySyllablesCount(5).forall(w => WordHyphenator.hyphenateForPl(w).length == 5))
-        assert(obtained.wordsBySyllablesCount(6).forall(w => WordHyphenator.hyphenateForPl(w).length == 6))
-        assert(obtained.wordsBySyllablesCount(7).forall(w => WordHyphenator.hyphenateForPl(w).length == 7))
+        (1 to HaikuBuilder.haikuMaxSyllablesCount).foreach { syllablesCount =>
+          assert(obtained.wordsBySyllablesCount(syllablesCount).forall(w => WordHyphenator.hyphenateForPl(w).length == syllablesCount))
+        }
       }
 
       "return invalid otherwise" in {
@@ -37,7 +31,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
         val obtained = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences)
         val expected = Invalid(NonEmptyList(
           head = ValidationError(s"Zero words for 1 syllables"),
-          tail = (2 to 7).map(syllablesNum =>
+          tail = (2 to HaikuBuilder.haikuMaxSyllablesCount).map(syllablesNum =>
             ValidationError(s"Zero words for $syllablesNum syllables")).toList)
         )
 
@@ -52,9 +46,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
           Word("pralka"),
           Word("autobus"),
           Word("magnetofon"),
-          Word("pomarańczowe"),
-          Word("zarchiwizowany"),
-          Word("wyrewolwerowany")
+          Word("pomarańczowe")
         ))
 
         val dict = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception(""))

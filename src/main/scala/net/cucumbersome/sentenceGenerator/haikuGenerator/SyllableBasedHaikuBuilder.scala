@@ -13,6 +13,10 @@ import scala.util.Random
 trait HaikuBuilder {
   def buildHaiku: Haiku
 }
+
+object HaikuBuilder {
+  val haikuMaxSyllablesCount = 5
+}
 class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) extends HaikuBuilder {
 
   private def disc = syllablesDictionary.wordsBySyllablesCount
@@ -29,7 +33,7 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
     def iterate(syllablesLeft: Int, acc: Seq[Word]): Seq[Word] = {
       if (syllablesLeft == 0) acc
       else {
-        val wordSyllableLength = 1 + Random.nextInt(syllablesLeft)
+        val wordSyllableLength = 1 + Random.nextInt(Math.min(syllablesLeft, HaikuBuilder.haikuMaxSyllablesCount))
         iterate(syllablesLeft - wordSyllableLength, acc :+ getWord(wordSyllableLength))
       }
     }
@@ -52,11 +56,11 @@ object SyllableBasedHaikuBuilder {
 
   class HaikuSyllablesDictionary private[haikuGenerator](val wordsBySyllablesCount: Map[Int, NonEmptyVector[Word]])
 
-  val haikuMaxSyllablesCount = 7
+
 
   private[haikuGenerator] def prepareWordWithSyllables(wordsWithSyllables: Seq[WordWithSyllables]): Map[Int, Seq[Word]] =
     wordsWithSyllables
-      .filter(w => w.syllables.length <= haikuMaxSyllablesCount)
+      .filter(w => w.syllables.length <= HaikuBuilder.haikuMaxSyllablesCount)
       .groupBy(_.syllables.length)
       .mapValues(_.map(_.word))
 
@@ -72,24 +76,20 @@ object SyllableBasedHaikuBuilder {
         .map(Valid.apply)
         .getOrElse(Invalid.apply(ValidationError(s"Zero words for $syllablesNum syllables"))).toValidatedNel
     }
-    Apply[ValidatedNel[ValidationError, ?]].map7(
+    Apply[ValidatedNel[ValidationError, ?]].map5(
       validateWordsNumberBySyllables(1),
       validateWordsNumberBySyllables(2),
       validateWordsNumberBySyllables(3),
       validateWordsNumberBySyllables(4),
-      validateWordsNumberBySyllables(5),
-      validateWordsNumberBySyllables(6),
-      validateWordsNumberBySyllables(7)
-    ) { case (sylalble1, syllable2, syllable3, syllable4, syllabe5, syllable6, syllable7) =>
+      validateWordsNumberBySyllables(5)
+    ) { case (sylalble1, syllable2, syllable3, syllable4, syllabe5) =>
       new HaikuSyllablesDictionary(
         Map(
           1 -> sylalble1,
           2 -> syllable2,
           3 -> syllable3,
           4 -> syllable4,
-          5 -> syllabe5,
-          6 -> syllable6,
-          7 -> syllable7
+          5 -> syllabe5
         )
       )
     }
