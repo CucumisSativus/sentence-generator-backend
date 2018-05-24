@@ -21,6 +21,7 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
 
   private def disc = syllablesDictionary.wordsBySyllablesCount
 
+  private val connectors = Seq(Word("a"), Word("z"), Word("o"), Word("i"), Word("w"))
   def buildHaiku: Haiku = {
     Haiku(
       generateLine(5),
@@ -34,7 +35,8 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
       if (syllablesLeft == 0) acc
       else {
         val wordSyllableLength = 1 + Random.nextInt(Math.min(syllablesLeft, HaikuBuilder.haikuMaxSyllablesCount))
-        iterate(syllablesLeft - wordSyllableLength, acc :+ getWord(wordSyllableLength))
+        if (wordSyllableLength == syllablesLeft) iterate(syllablesLeft - wordSyllableLength, acc :+ getLastWord(wordSyllableLength))
+        else iterate(syllablesLeft - wordSyllableLength, acc :+ getWord(wordSyllableLength))
       }
     }
 
@@ -44,6 +46,11 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
   private def getWord(syllables: Int) = {
     val words = disc(syllables)
     words.getUnsafe(Random.nextInt(words.length))
+  }
+
+  private def getLastWord(syllables: Int): Word = {
+    val words = disc(syllables).filter(w => !connectors.contains(w))
+    words(Random.nextInt(words.length))
   }
 }
 
