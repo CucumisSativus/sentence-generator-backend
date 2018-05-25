@@ -9,7 +9,8 @@ class FromStringTokenizerTest extends WordSpec with Matchers with TableDrivenPro
     ("name", "sentence as string", "parsed sentence"),
     ("simple sentence", simpleSentence, expectedSimpleSentence),
     ("two sentences in one string", twoSentencesInOneString, expectedTwoSentences),
-    ("same two sentences with multiple lines", sentencesWithMultipleLines, expectedTwoSentences)
+    ("same two sentences with multiple lines", sentencesWithMultipleLines, expectedTwoSentences),
+    ("sentence with dashes", sentenceWithDashes, expectedSimpleSentence)
   )
 
   "from string tokenizer" should {
@@ -36,4 +37,6 @@ class FromStringTokenizerTest extends WordSpec with Matchers with TableDrivenPro
       |This is the first sentence.
       |This is the second sentence.
     """.stripMargin
+
+  def sentenceWithDashes = "This--is--a--simple- sentence"
 }
