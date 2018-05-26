@@ -51,9 +51,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
 
         val dict = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception(""))
 
-        val haikuBuilder = new SyllableBasedHaikuBuilder(dict)
-
-        val obtained = haikuBuilder.buildHaiku
+        val obtained = SyllableBasedHaikuBuilder.buildHaiku(dict)
 
         obtained.firstLine.map(w => WordHyphenator.hyphenateForPl(w).length).sum shouldBe 5
         obtained.middleLine.map(w => WordHyphenator.hyphenateForPl(w).length).sum shouldBe 7
@@ -73,9 +71,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
 
         val dict = SyllableBasedHaikuBuilder.buildSyllablesDictionary(sentences).getOrElse(throw new Exception(""))
 
-        val haikuBuilder = new SyllableBasedHaikuBuilder(dict)
-
-        val obtained = haikuBuilder.buildHaiku
+        val obtained = SyllableBasedHaikuBuilder.buildHaiku(dict)
 
         assert(!connectors.contains(obtained.firstLine.last))
         assert(!connectors.contains(obtained.middleLine.last))

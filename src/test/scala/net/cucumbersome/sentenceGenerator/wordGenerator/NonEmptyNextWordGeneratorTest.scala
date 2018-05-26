@@ -10,9 +10,7 @@ class NonEmptyNextWordGeneratorTest extends WordSpec with Matchers {
       "return one of the words from list if there is more than one" in {
         val words = NonEmptyVector(WordWithSuccessors(Word("word"), Seq()), Vector(WordWithSuccessors(Word("another_word"), Seq())))
 
-        val generator = new NonEmptyNextWordGenerator(words)
-
-        generator.nextWord should contain oneOf(Word("word"), Word("another_word"))
+        NonEmptyNextWordGenerator.firstWord(words) should contain oneOf(Word("word"), Word("another_word"))
       }
     }
 
@@ -28,17 +26,13 @@ class NonEmptyNextWordGeneratorTest extends WordSpec with Matchers {
           )
         )
 
-        val generator = new NonEmptyNextWordGenerator(words)
-
-        generator.nextWord(Word("word"), 2) should contain oneOf(Word("succ1"), Word("succ2"))
+        NonEmptyNextWordGenerator.nextWord(words)(Word("word"), 2) should contain oneOf(Word("succ1"), Word("succ2"))
       }
 
       "returns none in case word has no successors" in {
         val words = NonEmptyVector.one(WordWithSuccessors(Word("word"), Seq()))
 
-        val generator = new NonEmptyNextWordGenerator(words)
-
-        generator.nextWord(Word("word")) shouldBe None
+        NonEmptyNextWordGenerator.nextWord(words)(Word("word")) shouldBe None
       }
     }
   }
