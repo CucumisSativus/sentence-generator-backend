@@ -2,12 +2,13 @@ name := "sentence-generator"
 
 version := "0.1"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
-val doobieVersion = "0.5.0"
-val http4sVersion = "0.18.2"
-val circeVersion = "0.9.2"
+val doobieVersion = "0.5.3"
+val http4sVersion = "0.18.11"
+val circeVersion = "0.9.3"
 val LogbackVersion = "1.2.3"
+val scalatestVersion = "3.0.4"
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
@@ -15,8 +16,8 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.typelevel" %% "cats-core" % "1.0.1",
-  "org.scalactic" %% "scalactic" % "3.0.4",
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+  "org.scalactic" %% "scalactic" % scalatestVersion % "test",
+  "org.scalatest" %% "scalatest" % scalatestVersion % "test",
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test",
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,

@@ -5,24 +5,19 @@ import cats.data.{NonEmptyList, NonEmptyVector, ValidatedNel}
 import cats.kernel.Semigroup
 import cats.{Apply, SemigroupK}
 import net.cucumbersome.sentenceGenerator.domain.{Haiku, Sentence, Word, WordWithSyllables}
-import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder.HaikuSyllablesDictionary
 import net.cucumbersome.sentenceGenerator.tokenizer.WordHyphenator
 
 import scala.util.Random
 
-trait HaikuBuilder {
-  def buildHaiku: Haiku
-}
-
 object HaikuBuilder {
   val haikuMaxSyllablesCount = 5
 }
-class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) extends HaikuBuilder {
 
-  private def disc = syllablesDictionary.wordsBySyllablesCount
-
+object SyllableBasedHaikuBuilder {
   private val connectors = Seq(Word("a"), Word("z"), Word("o"), Word("i"), Word("w"))
-  def buildHaiku: Haiku = {
+
+  def buildHaiku(haikuSyllablesDictionary: HaikuSyllablesDictionary): Haiku = {
+    implicit val disc: Map[Int, NonEmptyVector[Word]] = haikuSyllablesDictionary.wordsBySyllablesCount
     Haiku(
       generateLine(5),
       generateLine(7),
@@ -30,7 +25,7 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
     )
   }
 
-  private def generateLine(maxSyllables: Int): Seq[Word] = {
+  private def generateLine(maxSyllables: Int)(implicit disc: Map[Int, NonEmptyVector[Word]]): Seq[Word] = {
     def iterate(syllablesLeft: Int, acc: Seq[Word]): Seq[Word] = {
       if (syllablesLeft == 0) acc
       else {
@@ -43,20 +38,18 @@ class SyllableBasedHaikuBuilder(syllablesDictionary: HaikuSyllablesDictionary) e
     iterate(maxSyllables, Seq.empty)
   }
 
-  private def getWord(syllables: Int) = {
+  private def getWord(syllables: Int)(implicit disc: Map[Int, NonEmptyVector[Word]]) = {
     val words = disc(syllables)
     words.getUnsafe(Random.nextInt(words.length))
   }
 
-  private def getLastWord(syllables: Int): Word = {
+  private def getLastWord(syllables: Int)(implicit disc: Map[Int, NonEmptyVector[Word]]): Word = {
     val words = disc(syllables).filter(w => !connectors.contains(w))
     words(Random.nextInt(words.length))
   }
-}
 
-object SyllableBasedHaikuBuilder {
 
-  case class ValidationError(err: String)
+  final case class ValidationError(err: String)
 
   implicit val nelSemigroup: Semigroup[NonEmptyList[ValidationError]] =
     SemigroupK[NonEmptyList].algebra[ValidationError]

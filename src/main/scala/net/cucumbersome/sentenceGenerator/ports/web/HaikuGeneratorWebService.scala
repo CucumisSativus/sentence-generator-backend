@@ -4,33 +4,30 @@ import cats.effect._
 import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import net.cucumbersome.sentenceGenerator.haikuGenerator.HaikuBuilder
+import net.cucumbersome.sentenceGenerator.domain.Haiku
 import net.cucumbersome.sentenceGenerator.output.toString.Shows._
-import net.cucumbersome.sentenceGenerator.ports.web.HaikuGeneratorWebService.GenerateHaikuResponse
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.impl.Root
 import org.http4s.dsl.io._
 
-class HaikuGeneratorWebService(haikuBuilder: HaikuBuilder) {
-  val service: HttpService[IO] = HttpService[IO] {
+object HaikuGeneratorWebService {
+  def service(builder: () => Haiku): HttpService[IO] = HttpService[IO] {
     case GET -> Root / "generate-haiku" =>
-      Ok(generateHaiku.asJson)
+      Ok(generateHaiku(builder).asJson)
   }
 
-  private def generateHaiku: GenerateHaikuResponse = {
-    val haiku = haikuBuilder.buildHaiku
+  private def generateHaiku(builder: () => Haiku): GenerateHaikuResponse = {
+    val haiku = builder()
     GenerateHaikuResponse(
       firstLine = haiku.firstLine.show,
       middleLine = haiku.middleLine.show,
       lastLine = haiku.lastLine.show
     )
   }
-}
 
-object HaikuGeneratorWebService {
 
-  case class GenerateHaikuResponse(
+  final case class GenerateHaikuResponse(
                                     firstLine: String,
                                     middleLine: String,
                                     lastLine: String

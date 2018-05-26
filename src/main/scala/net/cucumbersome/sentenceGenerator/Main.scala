@@ -1,13 +1,11 @@
 package net.cucumbersome.sentenceGenerator
 
-import cats.data.NonEmptyVector
 import cats.data.Validated.{Invalid, Valid}
 import cats.effect.IO
 import fs2.StreamApp
 import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder
 import net.cucumbersome.sentenceGenerator.ports.web.HaikuGeneratorWebService
 import net.cucumbersome.sentenceGenerator.tokenizer.FromStringTokenizer
-import net.cucumbersome.sentenceGenerator.wordCounter.SentenceWordCounter
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.middleware._
 
@@ -29,13 +27,7 @@ object Main extends StreamApp[IO] {
     }
 
 
-    val haikuBuilder = new SyllableBasedHaikuBuilder(haikuDictionary)
-
-    val wordCounts = SentenceWordCounter.countWords(sentences)
-    val vector = NonEmptyVector(wordCounts.head, wordCounts.toVector)
-
-
-    val httpService = CORS(new HaikuGeneratorWebService(haikuBuilder).service)
+    val httpService = CORS(HaikuGeneratorWebService.service(() => SyllableBasedHaikuBuilder.buildHaiku(haikuDictionary)))
 
     BlazeBuilder[IO]
       .bindHttp(8080, "0.0.0.0")
