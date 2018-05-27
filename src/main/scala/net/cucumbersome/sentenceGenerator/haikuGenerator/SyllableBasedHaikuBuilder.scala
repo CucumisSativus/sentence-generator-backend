@@ -1,10 +1,12 @@
 package net.cucumbersome.sentenceGenerator.haikuGenerator
 
+import java.util.UUID
+
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, NonEmptyVector, ValidatedNel}
 import cats.kernel.Semigroup
 import cats.{Apply, SemigroupK}
-import net.cucumbersome.sentenceGenerator.domain.{Haiku, Sentence, Word, WordWithSyllables}
+import net.cucumbersome.sentenceGenerator.domain._
 import net.cucumbersome.sentenceGenerator.tokenizer.WordHyphenator
 
 import scala.util.Random
@@ -16,12 +18,13 @@ object HaikuBuilder {
 object SyllableBasedHaikuBuilder {
   private val connectors = Seq(Word("a"), Word("z"), Word("o"), Word("i"), Word("w"))
 
-  def buildHaiku(haikuSyllablesDictionary: HaikuSyllablesDictionary): Haiku = {
+  def buildHaiku(haikuSyllablesDictionary: HaikuSyllablesDictionary, generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
     implicit val disc: Map[Int, NonEmptyVector[Word]] = haikuSyllablesDictionary.wordsBySyllablesCount
     Haiku(
-      generateLine(5),
-      generateLine(7),
-      generateLine(5)
+      id = HaikuId(generateId()),
+      firstLine = generateLine(5),
+      middleLine = generateLine(7),
+      lastLine = generateLine(5)
     )
   }
 
@@ -55,7 +58,6 @@ object SyllableBasedHaikuBuilder {
     SemigroupK[NonEmptyList].algebra[ValidationError]
 
   class HaikuSyllablesDictionary private[haikuGenerator](val wordsBySyllablesCount: Map[Int, NonEmptyVector[Word]])
-
 
 
   private[haikuGenerator] def prepareWordWithSyllables(wordsWithSyllables: Seq[WordWithSyllables]): Map[Int, Seq[Word]] =
