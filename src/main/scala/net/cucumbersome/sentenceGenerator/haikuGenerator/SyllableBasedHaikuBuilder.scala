@@ -1,10 +1,12 @@
 package net.cucumbersome.sentenceGenerator.haikuGenerator
 
+import java.util.UUID
+
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, NonEmptyVector, ValidatedNel}
 import cats.kernel.Semigroup
 import cats.{Apply, SemigroupK}
-import net.cucumbersome.sentenceGenerator.domain.{Haiku, Sentence, Word, WordWithSyllables}
+import net.cucumbersome.sentenceGenerator.domain._
 import net.cucumbersome.sentenceGenerator.tokenizer.WordHyphenator
 
 import scala.util.Random
@@ -14,14 +16,19 @@ object HaikuBuilder {
 }
 
 object SyllableBasedHaikuBuilder {
-  private val connectors = Seq(Word("a"), Word("z"), Word("o"), Word("i"), Word("w"))
+  private val connectors = Seq(
+    Word("a"), Word("z"), Word("o"), Word("i"), Word("w"), Word("do"), Word("że"),
+    Word("aż"), Word("do"), Word("ale"), Word("niż"), Word("dla"), Word("ależ"), Word("lecz"), Word("aby"),
+    Word("ode"), Word("za"), Word("na")
+  )
 
-  def buildHaiku(haikuSyllablesDictionary: HaikuSyllablesDictionary): Haiku = {
+  def buildHaiku(haikuSyllablesDictionary: HaikuSyllablesDictionary, generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
     implicit val disc: Map[Int, NonEmptyVector[Word]] = haikuSyllablesDictionary.wordsBySyllablesCount
     Haiku(
-      generateLine(5),
-      generateLine(7),
-      generateLine(5)
+      id = HaikuId(generateId()),
+      firstLine = generateLine(5),
+      middleLine = generateLine(7),
+      lastLine = generateLine(5)
     )
   }
 
@@ -30,14 +37,20 @@ object SyllableBasedHaikuBuilder {
       if (syllablesLeft == 0) acc
       else {
         val wordSyllableLength = 1 + Random.nextInt(Math.min(syllablesLeft, HaikuBuilder.haikuMaxSyllablesCount))
-        if (wordSyllableLength == syllablesLeft) iterate(syllablesLeft - wordSyllableLength, acc :+ getLastWord(wordSyllableLength))
-        else iterate(syllablesLeft - wordSyllableLength, acc :+ getWord(wordSyllableLength))
+        val generatedWord = nextWord(wordSyllableLength, syllablesLeft)
+
+        if (acc.lastOption.contains(generatedWord)) iterate(syllablesLeft, acc)
+        else iterate(syllablesLeft - wordSyllableLength, acc :+ generatedWord)
       }
     }
 
     iterate(maxSyllables, Seq.empty)
   }
 
+  private def nextWord(syllableLenght: Int, syllablesLeft: Int)(implicit disc: Map[Int, NonEmptyVector[Word]]): Word = {
+    if (syllableLenght == syllablesLeft) getLastWord(syllableLenght)
+    else getWord(syllableLenght)
+  }
   private def getWord(syllables: Int)(implicit disc: Map[Int, NonEmptyVector[Word]]) = {
     val words = disc(syllables)
     words.getUnsafe(Random.nextInt(words.length))
@@ -55,7 +68,6 @@ object SyllableBasedHaikuBuilder {
     SemigroupK[NonEmptyList].algebra[ValidationError]
 
   class HaikuSyllablesDictionary private[haikuGenerator](val wordsBySyllablesCount: Map[Int, NonEmptyVector[Word]])
-
 
 
   private[haikuGenerator] def prepareWordWithSyllables(wordsWithSyllables: Seq[WordWithSyllables]): Map[Int, Seq[Word]] =

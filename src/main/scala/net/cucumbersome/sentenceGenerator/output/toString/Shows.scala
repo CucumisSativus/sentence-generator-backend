@@ -1,7 +1,7 @@
 package net.cucumbersome.sentenceGenerator.output.toString
 
 import cats._
-import net.cucumbersome.sentenceGenerator.domain.{Sentence, Word}
+import net.cucumbersome.sentenceGenerator.domain.{HaikuId, Sentence, Word}
 
 object Shows {
   implicit val sentenceShow: Show[Sentence] = Show.show { sentence =>
@@ -16,4 +16,6 @@ object Shows {
       .map(_.value)
       .mkString(" ")
   }
+
+  implicit val idShow: Show[HaikuId] = Show.show { id => id.value }
 }

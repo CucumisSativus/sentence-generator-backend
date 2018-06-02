@@ -20,6 +20,7 @@ object HaikuGeneratorWebService {
   private def generateHaiku(builder: () => Haiku): GenerateHaikuResponse = {
     val haiku = builder()
     GenerateHaikuResponse(
+      id = haiku.id.show,
       firstLine = haiku.firstLine.show,
       middleLine = haiku.middleLine.show,
       lastLine = haiku.lastLine.show
@@ -28,9 +29,10 @@ object HaikuGeneratorWebService {
 
 
   final case class GenerateHaikuResponse(
-                                    firstLine: String,
-                                    middleLine: String,
-                                    lastLine: String
+                                          id: String,
+                                          firstLine: String,
+                                          middleLine: String,
+                                          lastLine: String
                                   )
 
 }
