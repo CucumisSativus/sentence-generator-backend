@@ -31,21 +31,22 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
   }
 
   private def generateLine(maxSyllables: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): Seq[Word] = {
-    def iterate(syllablesLeft: Int, acc: NonEmptyVector[Word]): NonEmptyVector[Word] = {
+    def iterate(syllablesLeft: Int, acc: NonEmptyVector[Word], iterationsCount: Int): NonEmptyVector[Word] = {
+      if(iterationsCount > 100) throw new Exception("Too deep iteration")
       if (syllablesLeft == 0) acc
       else {
         val wordSyllableLength = randomSyllableLength(syllablesLeft)
         val generatedWord = generateNextWord(acc.last, wordSyllableLength)
 
-        if (acc.find(_ == generatedWord).isDefined) iterate(syllablesLeft, acc)
-        else if (connectors.contains(generatedWord)) iterate(syllablesLeft, acc)
-        else iterate(syllablesLeft - wordSyllableLength, acc :+ generatedWord)
+        if (acc.find(_ == generatedWord).isDefined) iterate(syllablesLeft, acc, iterationsCount+1)
+        else if (connectors.contains(generatedWord)) iterate(syllablesLeft, acc, iterationsCount+1)
+        else iterate(syllablesLeft - wordSyllableLength, acc :+ generatedWord, iterationsCount+1)
       }
     }
 
     val firstWordSyllableCount = randomSyllableLength(maxSyllables)
     val firstWord = NonEmptyNextWordGenerator.firstWord(words)(firstWordSyllableCount.toSyllableCount)
-    iterate(maxSyllables - firstWordSyllableCount, NonEmptyVector.one(firstWord)).toVector
+    iterate(maxSyllables - firstWordSyllableCount, NonEmptyVector.one(firstWord), 0).toVector
   }
 
   private def randomSyllableLength(syllablesLeft: Int): Int =
