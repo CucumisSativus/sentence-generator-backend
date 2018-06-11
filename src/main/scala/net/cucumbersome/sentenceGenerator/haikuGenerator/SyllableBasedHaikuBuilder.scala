@@ -16,7 +16,8 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
   private val connectors = Seq(
     Word("a"), Word("z"), Word("o"), Word("i"), Word("w"), Word("do"), Word("że"),
     Word("aż"), Word("do"), Word("ale"), Word("niż"), Word("dla"), Word("ależ"), Word("lecz"), Word("aby"),
-    Word("ode"), Word("za"), Word("na")
+    Word("ode"), Word("za"), Word("na"), Word("jak"), Word("pod"), Word("ze"), Word("ta"), Word("po"), Word("nad"),
+    Word("bo"), Word("czy"), Word("przy")
   )
 
   def buildHaiku(haikuSyllablesDictionary: NonEmptyVector[WordWithSuccessors], generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
