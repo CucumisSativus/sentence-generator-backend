@@ -6,6 +6,11 @@ trait DomainConversions {
     def unsafeToWord: Word = Word(string)
   }
 
+  implicit class FromIntConverters(integer: Int) {
+    def toAppearanceCount: AppearanceCount = AppearanceCount(integer)
+
+    def toSyllableCount: SyllableCount = SyllableCount(integer)
+  }
 }
 
 object DomainConversions extends DomainConversions

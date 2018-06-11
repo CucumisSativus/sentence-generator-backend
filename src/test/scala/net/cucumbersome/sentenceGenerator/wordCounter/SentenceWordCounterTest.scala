@@ -7,13 +7,13 @@ class SentenceWordCounterTest extends WordSpec with Matchers with DomainConversi
   "sentence word counter" should {
     "count words from simple sentence" in {
       val sentence = Sentence(
-        "simple".unsafeToWord, "sentence".unsafeToWord, "word".unsafeToWord, "sentence".unsafeToWord, "word".unsafeToWord
+        "dziewczyna".unsafeToWord, "kubeczek".unsafeToWord, "noga".unsafeToWord, "kubeczek".unsafeToWord, "noga".unsafeToWord
       )
 
       val expectedOutput = List(
-        WordWithSuccessors(Word("simple"), Seq(Successor(Word("sentence"), 1))),
-        WordWithSuccessors(Word("sentence"), Seq(Successor(Word("word"), 2))),
-        WordWithSuccessors(Word("word"), Seq(Successor(Word("sentence"), 1)))
+        WordWithSuccessors(Word("dziewczyna"), 3.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount))),
+        WordWithSuccessors(Word("kubeczek"), 3.toSyllableCount, Seq(Successor(Word("noga"), 2.toAppearanceCount, 2.toSyllableCount))),
+        WordWithSuccessors(Word("noga"), 2.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount)))
       )
 
       SentenceWordCounter.countWords(List(sentence)) should contain theSameElementsAs expectedOutput
@@ -23,17 +23,16 @@ class SentenceWordCounterTest extends WordSpec with Matchers with DomainConversi
   "reduceWordsWithSuccessors" should {
     "aggregate the same words" in {
       val wordsWithSuccessors = List(
-        WordWithSuccessors(Word("word"), Seq(Successor(Word("successor1"), 1))),
-        WordWithSuccessors(Word("word2"), Seq(Successor(Word("successor1"), 1))),
-        WordWithSuccessors(Word("word"), Seq(Successor(Word("successor1"), 1))),
-        WordWithSuccessors(Word("word"), Seq(Successor(Word("successor2"), 1)))
+        WordWithSuccessors(Word("kwiatek"), 2.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount))),
+        WordWithSuccessors(Word("noga"), 2.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount))),
+        WordWithSuccessors(Word("kwiatek"), 3.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount))),
+        WordWithSuccessors(Word("kwiatek"), 2.toSyllableCount, Seq(Successor(Word("dziewczyna"), 1.toAppearanceCount, 3.toSyllableCount)))
       )
 
       val expectedOutput = List(
-        WordWithSuccessors(Word("word2"), Seq(Successor(Word("successor1"), 1))),
-        WordWithSuccessors(Word("word"), Seq(Successor(Word("successor1"), 2), Successor(Word("successor2"), 1)))
+        WordWithSuccessors(Word("noga"), 2.toSyllableCount, Seq(Successor(Word("kubeczek"), 1.toAppearanceCount, 3.toSyllableCount))),
+        WordWithSuccessors(Word("kwiatek"), 2.toSyllableCount, Seq(Successor(Word("kubeczek"), 2.toAppearanceCount, 3.toSyllableCount), Successor(Word("dziewczyna"), 1.toAppearanceCount, 3.toSyllableCount)))
       )
-
       SentenceWordCounter.reduceWordsWithSuccessors(wordsWithSuccessors) should contain theSameElementsAs expectedOutput
     }
   }

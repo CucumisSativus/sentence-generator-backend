@@ -1,8 +1,9 @@
 package net.cucumbersome.sentenceGenerator.tokenizer
 
 import de.mfietz.jhyphenator.{HyphenationPattern, Hyphenator}
-import net.cucumbersome.sentenceGenerator.domain.{Syllable, Word}
-import collection.JavaConverters._
+import net.cucumbersome.sentenceGenerator.domain.{Syllable, SyllableCount, Word}
+
+import scala.collection.JavaConverters._
 
 object WordHyphenator {
   private val hyphenator = Hyphenator.getInstance(HyphenationPattern.PL)
@@ -11,4 +12,6 @@ object WordHyphenator {
       .map(Syllable.apply)
       .toList
   }
+
+  def syllableCountForPl(word: Word): SyllableCount = SyllableCount(hyphenateForPl(word).length)
 }
