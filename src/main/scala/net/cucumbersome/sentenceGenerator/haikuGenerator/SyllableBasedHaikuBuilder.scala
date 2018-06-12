@@ -30,23 +30,34 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
     )
   }
 
-  private def generateLine(maxSyllables: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): Seq[Word] = {
-    def iterate(syllablesLeft: Int, acc: NonEmptyVector[Word], iterationsCount: Int): NonEmptyVector[Word] = {
-      if(iterationsCount > 100) throw new Exception("Too deep iteration")
+  def generateLine(maxSyllables: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): Seq[Word] = {
+    def iterate(syllablesCounts: List[Int], acc: NonEmptyVector[Word]): NonEmptyVector[Word] = syllablesCounts match {
+      case Nil => acc
+      case head :: Nil =>
+        val word = generateNextWord(acc.last, head)
+        if (connectors.contains(word)) iterate(syllablesCounts, acc)
+        else acc :+ word
+
+      case head :: tail =>
+        val word = generateNextWord(acc.last, head)
+        iterate(tail, acc :+ word)
+    }
+
+    val syllables = generateSyllablesNumber(maxSyllables)
+    val firstWord = NonEmptyNextWordGenerator.firstWord(words)(syllables.head.toSyllableCount)
+    iterate(syllables.tail, NonEmptyVector.one(firstWord)).toVector
+  }
+
+  private def generateSyllablesNumber(syllableCount: Int): List[Int] = {
+    def iterate(syllablesLeft: Int, acc: List[Int]): List[Int] = {
       if (syllablesLeft == 0) acc
       else {
-        val wordSyllableLength = randomSyllableLength(syllablesLeft)
-        val generatedWord = generateNextWord(acc.last, wordSyllableLength)
-
-        if (acc.find(_ == generatedWord).isDefined) iterate(syllablesLeft, acc, iterationsCount+1)
-        else if (connectors.contains(generatedWord)) iterate(syllablesLeft, acc, iterationsCount+1)
-        else iterate(syllablesLeft - wordSyllableLength, acc :+ generatedWord, iterationsCount+1)
+        val newCount = randomSyllableLength(syllablesLeft)
+        iterate(syllablesLeft - newCount, acc :+ newCount)
       }
     }
 
-    val firstWordSyllableCount = randomSyllableLength(maxSyllables)
-    val firstWord = NonEmptyNextWordGenerator.firstWord(words)(firstWordSyllableCount.toSyllableCount)
-    iterate(maxSyllables - firstWordSyllableCount, NonEmptyVector.one(firstWord), 0).toVector
+    iterate(syllableCount - 2, List(2)).reverse
   }
 
   private def randomSyllableLength(syllablesLeft: Int): Int =
