@@ -36,11 +36,13 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
       case head :: Nil =>
         val word = generateNextWord(acc.last, head)
         if (connectors.contains(word)) iterate(syllablesCounts, acc)
+        else if (word == acc.last) iterate(syllablesCounts, acc)
         else acc :+ word
 
       case head :: tail =>
         val word = generateNextWord(acc.last, head)
-        iterate(tail, acc :+ word)
+        if (word == acc.last) iterate(syllablesCounts, acc)
+        else iterate(tail, acc :+ word)
     }
 
     val syllables = generateSyllablesNumber(maxSyllables)
@@ -57,7 +59,8 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
       }
     }
 
-    iterate(syllableCount - 2, List(2)).reverse
+    val firstSyllable = Math.min(1 + randomSyllableLength(syllableCount - 1), HaikuBuilder.haikuMaxSyllablesCount)
+    iterate(syllableCount - firstSyllable, List(firstSyllable)).reverse
   }
 
   private def randomSyllableLength(syllablesLeft: Int): Int =
