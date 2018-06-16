@@ -10,6 +10,8 @@ import scala.util.Random
 
 object HaikuBuilder {
   val haikuMaxSyllablesCount = 5
+
+
 }
 
 object SyllableBasedHaikuBuilder extends DomainConversions {
@@ -20,7 +22,9 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
     Word("bo"), Word("czy"), Word("przy")
   )
 
-  def buildHaiku(haikuSyllablesDictionary: NonEmptyVector[WordWithSuccessors], generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
+  def buildHaiku(haikuSyllablesDictionary: NonEmptyVector[WordWithSuccessors],
+                 generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
+
     implicit val dict: NonEmptyVector[WordWithSuccessors] = haikuSyllablesDictionary
     Haiku(
       id = HaikuId(generateId()),
@@ -63,8 +67,21 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
     iterate(syllableCount - firstSyllable, List(firstSyllable)).reverse
   }
 
-  private def randomSyllableLength(syllablesLeft: Int): Int =
-    1 + Random.nextInt(Math.min(syllablesLeft, HaikuBuilder.haikuMaxSyllablesCount))
+  private def randomSyllableLength(syllablesLeft: Int): Int = {
+    if (syllablesLeft == 1) 1
+    else callculateNumberFromGaussDistribution(syllablesLeft)
+
+  }
+
+  private def callculateNumberFromGaussDistribution(syllablesLeft: Int): Int = {
+    val average: Double = 0.5 * syllablesLeft
+    val stdDev: Double = average / 6
+    val gausNumber = Math.abs(average + Random.nextGaussian() * stdDev)
+
+    if (gausNumber < 1.0) callculateNumberFromGaussDistribution(syllablesLeft)
+    else if (gausNumber > syllablesLeft.toDouble) callculateNumberFromGaussDistribution(syllablesLeft)
+    else Math.round(gausNumber).toInt
+  }
 
   private def generateNextWord(previousWord: Word, syllableLenght: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): Word = {
     NonEmptyNextWordGenerator.nextWord(words)(previousWord, syllableLenght.toSyllableCount)

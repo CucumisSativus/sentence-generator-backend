@@ -42,25 +42,6 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
         assert(!connectors.contains(obtained.middleLine.last))
         assert(!connectors.contains(obtained.lastLine.last))
       }
-
-      "build haiku without same words one after another" in {
-        val obtained = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors)
-
-        assert(nextWordDifferentFromPreviousForWholeLine(obtained.firstLine.toList))
-        assert(nextWordDifferentFromPreviousForWholeLine(obtained.middleLine.toList))
-        assert(nextWordDifferentFromPreviousForWholeLine(obtained.lastLine.toList))
-
-      }
-
-      def nextWordDifferentFromPreviousForWholeLine(words: List[Word]): Boolean = {
-        def iterate(list: List[Word], previousWord: Word): Boolean = list match {
-          case Nil => true
-          case head :: _ if head == previousWord => false
-          case _ :: tail => iterate(tail, previousWord)
-        }
-
-        iterate(words.tail, words.head)
-      }
     }
   }
 }
