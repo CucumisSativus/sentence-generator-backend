@@ -28,7 +28,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser" % circeVersion,
   "ch.qos.logback" % "logback-classic" % LogbackVersion,
   "com.github.CucumisSativus" % "JHyphenator" % "master-SNAPSHOT",
-  "com.github.pureconfig" %% "pureconfig" % "0.9.1"
+  "com.github.pureconfig" %% "pureconfig" % "0.9.1",
+  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)

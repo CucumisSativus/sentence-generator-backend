@@ -17,9 +17,13 @@ object Sentence {
 
 }
 
-final case class Successor(successor: Word, count: Int)
+final case class AppearanceCount(value: Int) extends AnyVal
 
-final case class WordWithSuccessors(word: Word, successors: Seq[Successor])
+final case class SyllableCount(value: Int) extends AnyVal
+
+final case class Successor(successor: Word, count: AppearanceCount, syllableCount: SyllableCount)
+
+final case class WordWithSuccessors(word: Word, syllableCount: SyllableCount, successors: Seq[Successor])
 
 final case class HaikuId(value: String) extends AnyVal
 
