@@ -4,13 +4,17 @@ import cats.data.NonEmptyVector
 import cats.effect.IO
 import fs2.StreamApp
 import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder
-import net.cucumbersome.sentenceGenerator.ports.web.HaikuGeneratorWebService
+import net.cucumbersome.sentenceGenerator.persistence.InMemoryHaikuRepostiory
+import net.cucumbersome.sentenceGenerator.ports.web.{HaikuGeneratorWebService, HaikuPersistenceWebService}
 import net.cucumbersome.sentenceGenerator.tokenizer.FromStringTokenizer
 import net.cucumbersome.sentenceGenerator.wordCounter.SentenceWordCounter
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.middleware._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+//import org.http4s.implicits._
+import cats.implicits._
+
 import scala.io.Source
 
 object Main extends StreamApp[IO] {
@@ -27,7 +31,13 @@ object Main extends StreamApp[IO] {
     val words = SentenceWordCounter.countWords(sentences)
     val thisShouldWork = NonEmptyVector(words.head, words.tail.toVector)
 
-    val httpService = CORS(HaikuGeneratorWebService.service(() => SyllableBasedHaikuBuilder.buildHaiku(thisShouldWork)))
+    val haikuRepository = new InMemoryHaikuRepostiory()
+    val haikuPersistenceWebService = HaikuPersistenceWebService.service(
+      haikuRepository.save,
+      haikuRepository.all _
+    )
+    val haikuGeneratorWebService = HaikuGeneratorWebService.service(() => SyllableBasedHaikuBuilder.buildHaiku(thisShouldWork))
+    val httpService = CORS(haikuGeneratorWebService <+> haikuPersistenceWebService)
 
     BlazeBuilder[IO]
       .bindHttp(8080, "0.0.0.0")
