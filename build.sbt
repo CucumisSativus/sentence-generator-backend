@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.typelevel" %% "cats-core" % "1.0.1",
+  "org.typelevel" %% "cats-effect" % "1.0.0-RC2",
   "org.scalactic" %% "scalactic" % scalatestVersion % "test",
   "org.scalatest" %% "scalatest" % scalatestVersion % "test",
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test",
