@@ -1,8 +1,10 @@
 package net.cucumbersome.sentenceGenerator.persistence
 
 import java.io.{BufferedReader, File, FileReader}
+import java.nio.file.{Files, StandardOpenOption}
 
-import cats.effect.IO
+import cats.effect._
+import cats.syntax.all._
 import io.circe
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -10,6 +12,7 @@ import io.circe.syntax._
 import net.cucumbersome.sentenceGenerator.domain.{Haiku, HaikuId, Word}
 
 import scala.collection.mutable.ListBuffer
+
 trait HaikuRepository {
   def save(haiku: Haiku): IO[Unit]
 
@@ -34,14 +37,25 @@ class InFileHaikuRepository(file: File) extends HaikuRepository {
   import net.cucumbersome.sentenceGenerator.persistence.InFileHaikuRepository._
 
   override def save(haiku: Haiku): IO[Unit] =
-    IO(new java.io.PrintWriter(file)).bracket { p =>
-      val databaseHaiku = toDatabaseHaiku(haiku)
-      IO(p.write(databaseHaiku.asJson.noSpaces))
-    } { p => IO(p.close()) }
+    IO {
+      val databaseHaiku = toDatabaseHaiku(haiku).asJson.noSpaces + "\n"
+      Files.write(file.toPath, databaseHaiku.getBytes("UTF-8"), StandardOpenOption.APPEND, StandardOpenOption.CREATE)
+      ()
+    }
+
+  //    IO(new java.io.PrintWriter(file)).flatMap { p =>
+  //      val databaseHaiku = toDatabaseHaiku(haiku)
+  //
+  //      IO(p.append(databaseHaiku.asJson.noSpaces))
+  //        .flatMap(_ => IO(p.close()))
+  //        .onError {
+  //          case _ => IO(p.close())
+  //        }
+  //    }
 
 
   override def all: IO[List[Haiku]] =
-    IO(new BufferedReader(new FileReader(file))).bracket { in =>
+    IO(new BufferedReader(new FileReader(file))).flatMap { in =>
       IO {
         val content = ListBuffer.empty[String]
         var line: String = null
@@ -50,8 +64,12 @@ class InFileHaikuRepository(file: File) extends HaikuRepository {
           if (line != null) content.append(line)
         } while (line != null)
         content.map(parseStringToHaiku).map(_.right.get).toList
+      }.flatMap(result =>
+        IO(in.close()).map(_ => result)
+      ).onError {
+        case _ => IO(in.close())
       }
-    } { in => IO(in.close()) }
+    }
 
 }
 

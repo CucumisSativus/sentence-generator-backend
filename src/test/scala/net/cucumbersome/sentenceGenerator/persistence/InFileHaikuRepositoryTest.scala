@@ -1,11 +1,13 @@
 package net.cucumbersome.sentenceGenerator.persistence
 
 import java.io.{BufferedReader, File, FileReader}
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.UUID
 
 import io.circe.parser._
+import net.cucumbersome.sentenceGenerator.domain.{HaikuId, Word}
 import net.cucumbersome.sentenceGenerator.test.Fixtures
 import org.scalatest.{Matchers, WordSpec}
+
 
 class InFileHaikuRepositoryTest extends WordSpec with Matchers {
   "An in file haiku repository" when {
@@ -29,12 +31,15 @@ class InFileHaikuRepositoryTest extends WordSpec with Matchers {
       "do it properly" in {
         val file = getFile
         val repo = getRepo(file)
-        val testHaiku = Fixtures.testHaiku
+        val testHaiku1 = Fixtures.testHaiku
+        val testHaiku2 = Fixtures.testHaiku.copy(id = HaikuId("other"), lastLine = Seq(Word("word")))
 
-        repo.save(testHaiku).unsafeRunSync()
+        repo.save(testHaiku1).unsafeRunSync()
+        repo.save(testHaiku2).unsafeRunSync()
+
         val obtained = repo.all.unsafeRunSync()
 
-        obtained.head shouldBe testHaiku
+        obtained should contain theSameElementsAs Seq(testHaiku1, testHaiku2)
       }
     }
   }
@@ -42,8 +47,7 @@ class InFileHaikuRepositoryTest extends WordSpec with Matchers {
   def getRepo(file: File) = new InFileHaikuRepository(file)
 
   def getFile: File = {
-    val number = new AtomicInteger()
-    val fileName = s"test-file${number.getAndIncrement()}.dat"
+    val fileName = s"test-file${UUID.randomUUID()}.dat"
     new File(fileName)
   }
 }

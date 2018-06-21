@@ -5,7 +5,7 @@ version := "0.1"
 scalaVersion := "2.12.6"
 
 val doobieVersion = "0.5.3"
-val http4sVersion = "0.18.11"
+val http4sVersion = "0.18.12"
 val circeVersion = "0.9.3"
 val LogbackVersion = "1.2.3"
 val scalatestVersion = "3.0.4"
@@ -15,8 +15,8 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.196",
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
-  "org.typelevel" %% "cats-core" % "1.0.1",
-  "org.typelevel" %% "cats-effect" % "1.0.0-RC2",
+  "org.typelevel" %% "cats-core" % "1.1.0",
+  "org.typelevel" %% "cats-effect" % "0.1.1",
   "org.scalactic" %% "scalactic" % scalatestVersion % "test",
   "org.scalatest" %% "scalatest" % scalatestVersion % "test",
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % "test",
