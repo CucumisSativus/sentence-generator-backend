@@ -1,10 +1,12 @@
 package net.cucumbersome.sentenceGenerator
 
+import java.io.File
+
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import fs2.StreamApp
 import net.cucumbersome.sentenceGenerator.haikuGenerator.SyllableBasedHaikuBuilder
-import net.cucumbersome.sentenceGenerator.persistence.InMemoryHaikuRepostiory
+import net.cucumbersome.sentenceGenerator.persistence.InFileHaikuRepository
 import net.cucumbersome.sentenceGenerator.ports.web.{HaikuGeneratorWebService, HaikuPersistenceWebService}
 import net.cucumbersome.sentenceGenerator.tokenizer.FromStringTokenizer
 import net.cucumbersome.sentenceGenerator.wordCounter.SentenceWordCounter
@@ -19,7 +21,7 @@ import scala.io.Source
 
 object Main extends StreamApp[IO] {
 
-  case class AppConfig(filePath: String)
+  case class AppConfig(filePath: String, databasePath: String)
 
   override def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] = {
     val config = pureconfig.loadConfigOrThrow[AppConfig]
@@ -31,7 +33,8 @@ object Main extends StreamApp[IO] {
     val words = SentenceWordCounter.countWords(sentences)
     val thisShouldWork = NonEmptyVector(words.head, words.tail.toVector)
 
-    val haikuRepository = new InMemoryHaikuRepostiory()
+
+    val haikuRepository = new InFileHaikuRepository(new File(config.databasePath))
     val haikuPersistenceWebService = HaikuPersistenceWebService.service(
       haikuRepository.save,
       haikuRepository.all _
