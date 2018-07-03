@@ -3,7 +3,10 @@ name := "sentence-generator"
 version := "0.1"
 
 scalaVersion := "2.12.6"
+
+javaOptions in Test += s"-Dconfig.file=${sourceDirectory.value}/test/resources/application.test.conf"
 fork in Test := true
+
 val doobieVersion = "0.5.3"
 val http4sVersion = "0.18.12"
 val circeVersion = "0.9.3"
