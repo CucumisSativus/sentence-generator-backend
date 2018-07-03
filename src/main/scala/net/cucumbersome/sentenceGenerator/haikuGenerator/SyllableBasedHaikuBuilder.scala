@@ -3,6 +3,8 @@ package net.cucumbersome.sentenceGenerator.haikuGenerator
 import java.util.UUID
 
 import cats.data.NonEmptyVector
+import cats.effect.IO
+import cats.implicits._
 import net.cucumbersome.sentenceGenerator.domain._
 import net.cucumbersome.sentenceGenerator.wordGenerator.NonEmptyNextWordGenerator
 
@@ -23,35 +25,42 @@ object SyllableBasedHaikuBuilder extends DomainConversions {
   )
 
   def buildHaiku(haikuSyllablesDictionary: NonEmptyVector[WordWithSuccessors],
-                 generateId: () => String = () => UUID.randomUUID().toString): Haiku = {
+                 generateId: () => String = () => UUID.randomUUID().toString): IO[Haiku] = {
 
     implicit val dict: NonEmptyVector[WordWithSuccessors] = haikuSyllablesDictionary
-    Haiku(
-      id = HaikuId(generateId()),
-      firstLine = generateLine(5),
-      middleLine = generateLine(7),
-      lastLine = generateLine(5)
-    )
+    (
+      generateLine(5),
+      generateLine(7),
+      generateLine(5)
+    ).mapN { case (firstLine, middleLine, lastLine) =>
+      Haiku(
+        id = HaikuId(generateId()),
+        firstLine = firstLine,
+        middleLine = middleLine,
+        lastLine = lastLine
+      )
+    }
   }
 
-  def generateLine(maxSyllables: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): Seq[Word] = {
-    def iterate(syllablesCounts: List[Int], acc: NonEmptyVector[Word]): NonEmptyVector[Word] = syllablesCounts match {
-      case Nil => acc
+  def generateLine(maxSyllables: Int)(implicit words: NonEmptyVector[WordWithSuccessors]): IO[Seq[Word]] = {
+    def iterate(syllablesCounts: List[Int], acc: NonEmptyVector[Word], iterationNum: Int): IO[NonEmptyVector[Word]] = syllablesCounts match {
+      case _ if iterationNum > 200 => IO.raiseError(new Exception("too deep iteration"))
+      case Nil => IO.pure(acc)
       case head :: Nil =>
         val word = generateNextWord(acc.last, head)
-        if (connectors.contains(word)) iterate(syllablesCounts, acc)
-        else if (word == acc.last) iterate(syllablesCounts, acc)
-        else acc :+ word
+        if (connectors.contains(word)) iterate(syllablesCounts, acc, iterationNum + 1)
+        else if (word == acc.last) iterate(syllablesCounts, acc, iterationNum + 1)
+        else IO.pure(acc :+ word)
 
       case head :: tail =>
         val word = generateNextWord(acc.last, head)
-        if (word == acc.last) iterate(syllablesCounts, acc)
-        else iterate(tail, acc :+ word)
+        if (word == acc.last) iterate(syllablesCounts, acc, iterationNum + 1)
+        else iterate(tail, acc :+ word, iterationNum + 1)
     }
 
     val syllables = generateSyllablesNumber(maxSyllables)
     val firstWord = NonEmptyNextWordGenerator.firstWord(words)(syllables.head.toSyllableCount)
-    iterate(syllables.tail, NonEmptyVector.one(firstWord)).toVector
+    iterate(syllables.tail, NonEmptyVector.one(firstWord), 0).map(_.toVector)
   }
 
   private def generateSyllablesNumber(syllableCount: Int): List[Int] = {

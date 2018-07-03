@@ -4,13 +4,16 @@ version := "0.1"
 
 scalaVersion := "2.12.6"
 
+javaOptions in Test += s"-Dconfig.file=${sourceDirectory.value}/test/resources/application.test.conf"
+fork in Test := true
+
 val doobieVersion = "0.5.3"
 val http4sVersion = "0.18.12"
 val circeVersion = "0.9.3"
 val LogbackVersion = "1.2.3"
 val scalatestVersion = "3.0.4"
 resolvers += "jitpack" at "https://jitpack.io"
-
+resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.196",
   "org.tpolecat" %% "doobie-core" % doobieVersion,
@@ -30,7 +33,10 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % LogbackVersion,
   "com.github.CucumisSativus" % "JHyphenator" % "master-SNAPSHOT",
   "com.github.pureconfig" %% "pureconfig" % "0.9.1",
-  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
+  "com.typesafe.akka" %% "akka-persistence" % "2.5.13",
+  "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+  "com.github.dnvriend" %% "akka-persistence-inmemory" % "2.5.1.1" % "test"
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
@@ -49,7 +55,7 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",     // Allow definition of implicit functions called views
   "-unchecked",                        // Enable additional warnings where generated code depends on assumptions.
   "-Xcheckinit",                       // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings",
+  //  "-Xfatal-warnings",
   "-Xfuture",                          // Turn on future language features.
   "-Xlint:adapted-args",               // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative",  // By-name parameter of right associative operator.
