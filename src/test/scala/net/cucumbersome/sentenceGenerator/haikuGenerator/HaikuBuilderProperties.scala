@@ -25,7 +25,7 @@ object HaikuBuilderProperties extends Properties("haiku") {
   }
 
   property("haiku never has same words one after another") = forAll { seed: Long =>
-    val haiku = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors)
+    val haiku = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors).unsafeRunSync()
     nextWordDifferentFromPreviousForWholeLine(haiku.firstLine.toList) &&
       nextWordDifferentFromPreviousForWholeLine(haiku.middleLine.toList) &&
       nextWordDifferentFromPreviousForWholeLine(haiku.lastLine.toList)

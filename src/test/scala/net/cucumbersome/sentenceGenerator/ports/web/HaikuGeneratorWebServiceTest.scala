@@ -25,5 +25,5 @@ class HaikuGeneratorWebServiceTest extends WordSpec with Matchers {
     }
   }
 
-  def buildHaiku: Haiku = Fixtures.testHaiku
+  def buildHaiku: IO[Haiku] = IO.pure(Fixtures.testHaiku)
 }

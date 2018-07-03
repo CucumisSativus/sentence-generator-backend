@@ -26,7 +26,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
   "Haiku builder" when {
     "building haiku" should {
       "build it properly" in {
-        val obtained = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors)
+        val obtained = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors).unsafeRunSync()
 
         obtained.firstLine.map(w => WordHyphenator.hyphenateForPl(w).length).sum shouldBe 5
         obtained.middleLine.map(w => WordHyphenator.hyphenateForPl(w).length).sum shouldBe 7
@@ -36,7 +36,7 @@ class SyllableBasedHaikuBuilderTest extends WordSpec with Matchers {
       "build haiku without connectors at the end" in {
         val connectors = Seq(Word("a"), Word("z"), Word("o"))
 
-        val obtained = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors)
+        val obtained = SyllableBasedHaikuBuilder.buildHaiku(wordsWithSuccessors).unsafeRunSync()
 
         assert(!connectors.contains(obtained.firstLine.last))
         assert(!connectors.contains(obtained.middleLine.last))
