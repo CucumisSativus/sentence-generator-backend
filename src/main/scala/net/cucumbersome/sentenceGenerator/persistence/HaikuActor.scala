@@ -3,10 +3,10 @@ package net.cucumbersome.sentenceGenerator.persistence
 import akka.Done
 import akka.actor._
 import akka.persistence._
-import net.cucumbersome.sentenceGenerator.domain.Haiku
-import net.cucumbersome.sentenceGenerator.persistence.HaikuActor.{HaikuSaved, ReadHaikus, SaveHaiku}
+import net.cucumbersome.sentenceGenerator.domain.{Haiku, HaikuId}
+import net.cucumbersome.sentenceGenerator.persistence.HaikuActor._
 
-class HaikuActor extends PersistentActor {
+class HaikuActor(val persistenceId: String = "haiku-actor") extends PersistentActor {
   private var state = List[Haiku]()
 
   override def receiveRecover: Receive = {
@@ -20,10 +20,14 @@ class HaikuActor extends PersistentActor {
       sender() ! Done
     }
 
+    case RemoveHaiku(haikuId) => persist(HaikuRemoved(haikuId)) { event =>
+      state = state.filter(_.id != haikuId)
+      sender() ! Done
+    }
+
     case ReadHaikus => sender() ! state
   }
 
-  override def persistenceId: String = "haiku-actor"
 }
 
 object HaikuActor {
@@ -32,10 +36,13 @@ object HaikuActor {
 
   case class SaveHaiku(haiku: Haiku) extends HaikuCommand
 
+  case class RemoveHaiku(haikuId: HaikuId) extends HaikuCommand
+
   case object ReadHaikus extends HaikuCommand
 
   sealed trait HaikuEvent
 
   case class HaikuSaved(haiku: Haiku) extends HaikuEvent
 
+  case class HaikuRemoved(haikuId: HaikuId) extends HaikuEvent
 }

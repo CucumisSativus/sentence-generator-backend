@@ -22,7 +22,7 @@ object Main extends StreamApp[IO] {
 
   implicit val system: ActorSystem = ActorSystem()
 
-  case class AppConfig(filePath: String)
+  case class AppConfig(filePath: String, removePassword: String)
 
   override def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] = {
     val config = pureconfig.loadConfigOrThrow[AppConfig]
@@ -38,7 +38,9 @@ object Main extends StreamApp[IO] {
     val haikuRepository = new InFileHaikuRepository(system.actorOf(Props(new HaikuActor)))
     val haikuPersistenceWebService = HaikuPersistenceWebService.service(
       haikuRepository.save,
-      haikuRepository.all _
+      haikuRepository.all _,
+      haikuRepository.remove _,
+      config.removePassword
     )
     val haikuGeneratorWebService = HaikuGeneratorWebService.service(() => SyllableBasedHaikuBuilder.buildHaiku(thisShouldWork))
     /*_*/
