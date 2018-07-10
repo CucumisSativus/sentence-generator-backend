@@ -9,19 +9,23 @@ import net.cucumbersome.sentenceGenerator.persistence.HaikuActor._
 class HaikuActor(val persistenceId: String = "haiku-actor") extends PersistentActor {
   private var state = List[Haiku]()
 
-  override def receiveRecover: Receive = {
+  private def updateSteate(event: HaikuEvent) = event match {
     case HaikuSaved(haiku) => state +:= haiku
+    case HaikuRemoved(haikuId) => state = state.filter(_.id != haikuId)
+  }
+  override def receiveRecover: Receive = {
+    case event: HaikuEvent => updateSteate(event)
     case SnapshotOffer(_, snapshot: List[Haiku]) => state = snapshot
   }
 
   override def receiveCommand: Receive = {
     case SaveHaiku(haiku) => persist(HaikuSaved(haiku)) { event =>
-      state +:= event.haiku
+      updateSteate(event)
       sender() ! Done
     }
 
     case RemoveHaiku(haikuId) => persist(HaikuRemoved(haikuId)) { event =>
-      state = state.filter(_.id != haikuId)
+      updateSteate(event)
       sender() ! Done
     }
 
