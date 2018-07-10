@@ -4,7 +4,7 @@ import akka.actor._
 import akka.pattern._
 import akka.util.Timeout
 import cats.effect._
-import net.cucumbersome.sentenceGenerator.domain.Haiku
+import net.cucumbersome.sentenceGenerator.domain.{Haiku, HaikuId}
 import net.cucumbersome.sentenceGenerator.persistence.HaikuActor._
 
 import scala.concurrent.duration._
@@ -14,6 +14,8 @@ trait HaikuRepository {
   def save(haiku: Haiku): IO[Unit]
 
   def all: IO[List[Haiku]]
+
+  def remove(haikuId: HaikuId): IO[Unit]
 }
 
 
@@ -37,6 +39,12 @@ class InFileHaikuRepository(actorRef: ActorRef) extends HaikuRepository {
     )
   }
 
-
+  override def remove(haikuId: HaikuId): IO[Unit] = {
+    IO.fromFuture(
+      IO(
+        (actorRef ? RemoveHaiku(haikuId))
+      )
+    ).map(_ => ())
+  }
 }
 

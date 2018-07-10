@@ -1,6 +1,5 @@
 package net.cucumbersome.sentenceGenerator.persistence
 
-import java.io.File
 import java.util.UUID
 
 import akka.actor.{ActorSystem, Props}
@@ -26,12 +25,23 @@ class InFileHaikuRepositoryTest extends WordSpec with Matchers {
         obtained should contain theSameElementsAs Seq(testHaiku1, testHaiku2)
       }
     }
+
+    "removing haikus" should {
+      "do it properly" in {
+        val repo = getRepo
+        val testHaiku1 = Fixtures.testHaiku
+        val testHaiku2 = Fixtures.testHaiku.copy(id = HaikuId("other"), lastLine = Seq(Word("word")))
+
+        repo.save(testHaiku1).unsafeRunSync()
+        repo.save(testHaiku2).unsafeRunSync()
+        repo.remove(testHaiku2.id).unsafeRunSync()
+
+        val obtained = repo.all.unsafeRunSync()
+
+        obtained should contain theSameElementsAs Seq(testHaiku1)
+      }
+    }
   }
 
-  def getRepo = new InFileHaikuRepository(system.actorOf(Props(new HaikuActor)))
-
-  def getFile: File = {
-    val fileName = s"test-file${UUID.randomUUID()}.dat"
-    new File(fileName)
-  }
+  def getRepo = new InFileHaikuRepository(system.actorOf(Props(new HaikuActor(UUID.randomUUID().toString))))
 }
